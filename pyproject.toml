@@ -1,0 +1,77 @@
+[project]
+name = "measured-rag"
+version = "0.1.0"
+description = "RAG system with evaluation-first methodology"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = ["pydantic>=2.12.5"]
+
+[dependency-groups]
+dev = [
+	"mypy>=1.19.1",
+	"pytest>=9.0.2",
+	"pytest-asyncio>=1.3.0",
+	"pytest-cov>=7.0.0",
+	"ruff>=0.15.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+	"-ra",
+	"--strict-config",
+	"--strict-markers",
+	"--cov=src",
+	"--cov-report=term-missing",
+]
+markers = [
+	"unit: fast, no external deps",
+	"integration: requires DB and/or API calls",
+]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+no_implicit_optional = true
+warn_unreachable = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+	"F",     # pyflakes
+	"E",     # pycodestyle errors
+	"W",     # pycodestyle warnings
+	"I",     # isort
+	"B",     # flake8-bugbear
+	"G",     # flake8-logging-format
+	"C4",    # flake8-comprehensions
+	"ARG",   # flake8-unused-arguments
+	"PT",    # flake8-pytest-style
+	"PTH",   # flake8-use-pathlib
+	"RET",   # flake8-return
+	"SIM",   # flake8-simplify
+	"RUF",   # Ruff-specific
+	"UP",    # pyupgrade
+	"FAST",  # FastAPI
+	"ASYNC", # flake8-async
+]
+ignore = [
+	"E501",   # line-too-long
+	"G004",   # log-exception-outside-except-handler
+	"UP007",  # non-pep604-annotation-union
+	"UP045",  # non-pep604-annotation-optional
+	"ANN003", # missing-type-kwargs
+	"ARG002", # unused-method-argument
+	"RET504", # unnecessary-assign
+	"RET505", # superfluous-else-return
+	"RET506", # superfluous-else-raise
+	"PTH123", # builtin-open
+	"SIM105", # suppressible-exception
+	"SIM108", # if-else-block-instead-of-if-exp
+	"SIM117", # multiple-with-statements
+	"RUF012", # mutable-class-default
+	"C408",   # unnecessary-collection-call
+]
