@@ -7,11 +7,6 @@ from rag.core.models import DocumentChunk
 from rag.services.chunker import SentenceChunker
 
 
-@pytest.fixture
-def tokenizer() -> tiktoken.Encoding:
-    return tiktoken.get_encoding("cl100k_base")
-
-
 @pytest.mark.unit
 class TestChunkTokenLimits:
     """All chunks must respect chunk_size."""
