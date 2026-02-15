@@ -15,6 +15,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from common.config import settings
 from common.db import base
 
+# Import all ORM models so Alembic can detect them
+from rag.db import models  # noqa
+
 # Alembic Config object
 config = context.config
 

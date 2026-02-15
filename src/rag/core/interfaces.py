@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from rag.core.models import DocumentChunk
+from rag.core.models import DocumentChunk, RetrievedChunk
 
 
 class DocumentChunker(ABC):
@@ -19,3 +19,22 @@ class EmbeddingService(ABC):
     @property
     @abstractmethod
     def dimension(self) -> int: ...
+
+
+class VectorStore(ABC):
+    @abstractmethod
+    async def ingest(
+        self,
+        document_id: str,
+        chunks: list[DocumentChunk],
+        embeddings: list[list[float]],
+    ) -> None: ...
+
+    @abstractmethod
+    async def search(
+        self,
+        query_vector: list[float],
+        top_k: int,
+        threshold: float = 0.0,
+        filters: dict[str, Any] | None = None,
+    ) -> list[RetrievedChunk]: ...
