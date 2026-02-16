@@ -1,7 +1,13 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any
 
-from rag.core.models import DocumentChunk, RetrievedChunk
+from rag.core.models import DocumentChunk, LoadedDocument, RetrievedChunk
+
+
+class DocumentLoader(ABC):
+    @abstractmethod
+    def load(self, path: Path) -> list[LoadedDocument]: ...
 
 
 class DocumentChunker(ABC):
