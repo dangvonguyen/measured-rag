@@ -1,6 +1,8 @@
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from rag.core.interfaces import VectorStore
@@ -91,3 +93,18 @@ class PGVectorStore(VectorStore):
             )
             for row in rows
         ]
+
+    @asynccontextmanager
+    async def transaction(self) -> AsyncGenerator[None]:
+        """Wrap a unit of work in a savepoint."""
+        async with self._session.begin_nested():
+            yield
+
+    async def delete_by_source(self, source_name: str) -> int:
+        """Delete all chunks with this source_name and return the deleted row count."""
+        stmt = delete(DocumentChunkRow).where(
+            DocumentChunkRow.source_name == source_name
+        )
+        result = await self._session.execute(stmt)
+        await self._session.flush()
+        return result.rowcount

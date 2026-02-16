@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 from typing import Any
 
@@ -44,3 +45,14 @@ class VectorStore(ABC):
         threshold: float = 0.0,
         filters: dict[str, Any] | None = None,
     ) -> list[RetrievedChunk]: ...
+
+    @abstractmethod
+    async def delete_by_source(self, source_name: str) -> int: ...
+
+    @abstractmethod
+    def transaction(self) -> AbstractAsyncContextManager[None]:
+        """Async context manager that wraps a unit of work in a savepoint.
+
+        Commits on success; rolls back to it on exception.
+        """
+        ...
