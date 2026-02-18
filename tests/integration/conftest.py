@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from common.config import settings
 from common.db.base import Base
 from rag.db import models  # noqa: F401
+from rag.services.embedder import OpenAIEmbeddingService
 from rag.services.vector_store import PGVectorStore
 
 _TEST_DB_NAME = f"{settings.POSTGRES_DB}_test"
@@ -82,3 +83,8 @@ async def db_session(db_schema: None) -> AsyncGenerator[AsyncSession]:  # noqa: 
 @pytest.fixture
 def vector_store(db_session: AsyncSession) -> PGVectorStore:
     return PGVectorStore(db_session)
+
+
+@pytest.fixture(scope="session")
+def embedder() -> OpenAIEmbeddingService:
+    return OpenAIEmbeddingService()

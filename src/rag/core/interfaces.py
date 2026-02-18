@@ -56,3 +56,14 @@ class VectorStore(ABC):
         Commits on success; rolls back to it on exception.
         """
         ...
+
+
+class RetrieverService(ABC):
+    @abstractmethod
+    async def retrieve(
+        self,
+        query_vector: list[float],
+        top_k: int,
+        threshold: float,
+        filters: dict[str, Any] | None = None,
+    ) -> list[RetrievedChunk]: ...
