@@ -3,11 +3,15 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from sqlalchemy import delete, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from rag.core.interfaces import VectorStore
 from rag.core.models import DocumentChunk, RetrievedChunk
 from rag.db.models import DocumentChunkRow
+
+# Define whitelist for top-level schema columns to prevent attribute injection
+_ALLOWED_FILTER_COLS = frozenset({"document_id", "source_name", "chunk_index"})
 
 
 class PGVectorStore(VectorStore):
@@ -29,18 +33,36 @@ class PGVectorStore(VectorStore):
         if not chunks:
             return
 
-        for chunk, embedding in zip(chunks, embeddings, strict=True):
-            row = DocumentChunkRow(
-                id=chunk.chunk_id,
-                document_id=document_id,
-                source_name=chunk.metadata["source_name"],
-                chunk_index=chunk.metadata["chunk_index"],
-                text=chunk.text,
-                embedding_vector=embedding,
-                meta=chunk.metadata,
-            )
-            await self._session.merge(row)
+        # Prepare records for bulk insert
+        records = [
+            {
+                "id": chunk.chunk_id,
+                "document_id": document_id,
+                "source_name": chunk.metadata.get("source_name"),
+                "chunk_index": chunk.metadata.get("chunk_index"),
+                "text": chunk.text,
+                "embedding_vector": embedding,
+                "meta": chunk.metadata,
+            }
+            for chunk, embedding in zip(chunks, embeddings, strict=True)
+        ]
 
+        # Use postgresql dialect insert for bulk upsert
+        stmt = insert(DocumentChunkRow).values(records)
+
+        # Define fields to update if the chunk_id already exists
+        upsert_stmt = stmt.on_conflict_do_update(
+            index_elements=[DocumentChunkRow.id],
+            set_={
+                "text": stmt.excluded.text,
+                "embedding_vector": stmt.excluded.embedding_vector,
+                "metadata": stmt.excluded.metadata,
+                "source_name": stmt.excluded.source_name,
+                "chunk_index": stmt.excluded.chunk_index,
+            },
+        )
+
+        await self._session.execute(upsert_stmt)
         await self._session.flush()
 
     async def search(
@@ -57,8 +79,8 @@ class PGVectorStore(VectorStore):
 
         if filters:
             for key, value in filters.items():
-                col = getattr(DocumentChunkRow, key, None)
-                if col is not None:
+                if key in _ALLOWED_FILTER_COLS:
+                    col = getattr(DocumentChunkRow, key)
                     where_clauses.append(col == value)
                 else:
                     where_clauses.append(DocumentChunkRow.meta[key] == value)

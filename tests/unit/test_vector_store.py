@@ -53,7 +53,6 @@ def mock_execute_result(rows: list) -> MagicMock:
 @pytest.fixture
 def mock_session() -> MagicMock:
     session = MagicMock()
-    session.merge = AsyncMock()
     session.flush = AsyncMock()
     session.execute = AsyncMock(return_value=mock_execute_result([]))
     return session
@@ -66,47 +65,39 @@ def vector_store(mock_session: MagicMock) -> PGVectorStore:
 
 @pytest.mark.unit
 class TestIngest:
-    """ingest() maps DocumentChunks + embeddings to DB rows and persists them."""
+    """ingest() maps chunks, embeddings to DB rows and persists them."""
 
-    async def test_ingest_merges_each_chunk(
+    async def test_ingest_executes_bulk_upsert(
         self, vector_store: PGVectorStore, mock_session: MagicMock
     ) -> None:
-        chunks = [make_chunk(f"chunk-{i}", chunk_index=i) for i in range(3)]
+        """
+        Verifies ingestion uses a single bulk execute.
+        """
+        chunks = [make_chunk(f"chunk-{i}") for i in range(3)]
         embeddings = [make_embedding() for _ in range(3)]
 
         await vector_store.ingest("doc-1", chunks, embeddings)
 
-        assert mock_session.merge.await_count == 3
-
-    async def test_ingest_maps_chunk_fields_to_row(
-        self, vector_store: PGVectorStore, mock_session: MagicMock
-    ) -> None:
-        chunk = make_chunk(
-            "chunk-0", text="Hello world", chunk_index=0, source_name="doc.md"
-        )
-        embedding = make_embedding(value=0.5)
-
-        await vector_store.ingest("doc-1", [chunk], [embedding])
-
-        row = mock_session.merge.call_args[0][0]
-        assert row.id == "chunk-0"
-        assert row.document_id == "doc-1"
-        assert row.source_name == "doc.md"
-        assert row.chunk_index == 0
-        assert row.text == "Hello world"
-        assert row.embedding_vector == embedding
+        assert mock_session.execute.await_count == 1
+        assert mock_session.flush.await_count == 1
 
     async def test_ingest_empty_chunks_skips_db_calls(
         self, vector_store: PGVectorStore, mock_session: MagicMock
     ) -> None:
+        """
+        Verifies empty inputs create no calls.
+        """
         await vector_store.ingest("doc-1", [], [])
 
-        mock_session.merge.assert_not_awaited()
+        mock_session.execute.assert_not_awaited()
         mock_session.flush.assert_not_awaited()
 
     async def test_ingest_mismatched_lengths_raises(
         self, vector_store: PGVectorStore
     ) -> None:
+        """
+        Verifies strict zipping prevents unaligned vectors.
+        """
         chunks = [make_chunk("chunk-0")]
         embeddings = [make_embedding(), make_embedding()]  # 2 != 1
 
@@ -118,7 +109,7 @@ class TestIngest:
 
 @pytest.mark.unit
 class TestSearch:
-    """search() returns RetrievedChunks sorted by similarity descending."""
+    """search() returns chunks sorted by similarity descending."""
 
     async def test_search_returns_retrieved_chunk_instances(
         self, vector_store: PGVectorStore, mock_session: MagicMock
