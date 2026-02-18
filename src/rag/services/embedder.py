@@ -3,6 +3,7 @@ import logging
 import tiktoken
 from openai import AsyncOpenAI
 
+from common.config import settings
 from rag.core.interfaces import EmbeddingService
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,7 @@ class OpenAIEmbeddingService(EmbeddingService):
         self._model = model
         self._dimension = dimension
         self._max_tokens = max_tokens
-        self._client = client or AsyncOpenAI()
+        self._client = client or AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         self._tokenizer = tokenizer or tiktoken.get_encoding("cl100k_base")
 
     async def embed_text(self, text: str) -> list[float]:

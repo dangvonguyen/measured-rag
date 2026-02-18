@@ -34,6 +34,9 @@ class CommonSettings(BaseSettings):
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 10
 
+    # API keys
+    OPENAI_API_KEY: str
+
 
 # Singleton instance
 settings = CommonSettings()  # type: ignore[call-arg]
