@@ -6,7 +6,7 @@ class CommonSettings(BaseSettings):
     """Global settings loaded from environment variables or .env file."""
 
     model_config = SettingsConfigDict(
-        env_file=("infra/.env.docker", ".env"),
+        env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )
