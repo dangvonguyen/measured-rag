@@ -11,12 +11,15 @@ def make_chunk(
     text: str = "Sample text.",
     chunk_index: int = 0,
     source_name: str = "test.md",
+    document_id: str = "doc-1",
 ) -> DocumentChunk:
     return DocumentChunk(
         chunk_id=chunk_id,
         text=text,
         token_count=10,
-        metadata={"chunk_index": chunk_index, "source_name": source_name},
+        document_id=document_id,
+        source_name=source_name,
+        chunk_index=chunk_index,
     )
 
 
@@ -76,7 +79,7 @@ class TestIngest:
         chunks = [make_chunk(f"chunk-{i}") for i in range(3)]
         embeddings = [make_embedding() for _ in range(3)]
 
-        await vector_store.ingest("doc-1", chunks, embeddings)
+        await vector_store.ingest(chunks, embeddings)
 
         assert mock_session.execute.await_count == 1
         assert mock_session.flush.await_count == 1
@@ -87,7 +90,7 @@ class TestIngest:
         """
         Verifies empty inputs create no calls.
         """
-        await vector_store.ingest("doc-1", [], [])
+        await vector_store.ingest([], [])
 
         mock_session.execute.assert_not_awaited()
         mock_session.flush.assert_not_awaited()
@@ -104,7 +107,7 @@ class TestIngest:
         with pytest.raises(
             ValueError, match=r"[Cc]hunks.*[Ee]mbedding|[Ee]mbedding.*[Cc]hunk"
         ):
-            await vector_store.ingest("doc-1", chunks, embeddings)
+            await vector_store.ingest(chunks, embeddings)
 
 
 @pytest.mark.unit

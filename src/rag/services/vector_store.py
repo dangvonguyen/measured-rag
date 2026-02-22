@@ -20,7 +20,6 @@ class PGVectorStore(VectorStore):
 
     async def ingest(
         self,
-        document_id: str,
         chunks: list[DocumentChunk],
         embeddings: list[list[float]],
     ) -> None:
@@ -37,9 +36,9 @@ class PGVectorStore(VectorStore):
         records = [
             {
                 "id": chunk.chunk_id,
-                "document_id": document_id,
-                "source_name": chunk.metadata.get("source_name"),
-                "chunk_index": chunk.metadata.get("chunk_index"),
+                "document_id": chunk.document_id,
+                "source_name": chunk.source_name,
+                "chunk_index": chunk.chunk_index,
                 "text": chunk.text,
                 "embedding_vector": embedding,
                 "meta": chunk.metadata,
@@ -83,6 +82,10 @@ class PGVectorStore(VectorStore):
                     col = getattr(DocumentChunkRow, key)
                     where_clauses.append(col == value)
                 else:
+                    if not isinstance(key, str):
+                        raise TypeError(
+                            f"Filter key must be str, got {type(key).__name__!r}"
+                        )
                     where_clauses.append(DocumentChunkRow.meta[key] == value)
 
         stmt = (
@@ -117,7 +120,7 @@ class PGVectorStore(VectorStore):
         ]
 
     @asynccontextmanager
-    async def transaction(self) -> AsyncGenerator[None]:
+    async def transaction(self) -> AsyncGenerator[None, None]:
         """Wrap a unit of work in a savepoint."""
         async with self._session.begin_nested():
             yield

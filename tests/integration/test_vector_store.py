@@ -14,12 +14,16 @@ def make_chunk(
     text: str = "Sample text.",
     chunk_index: int = 0,
     source_name: str = "test.md",
+    document_id: str = "doc-0",
 ) -> DocumentChunk:
     return DocumentChunk(
         chunk_id=chunk_id,
+        document_id=document_id,
+        source_name=source_name,
+        chunk_index=chunk_index,
         text=text,
         token_count=10,
-        metadata={"chunk_index": chunk_index, "source_name": source_name},
+        metadata={},
     )
 
 
@@ -38,7 +42,7 @@ class TestIngestIntegration:
         chunks = [make_chunk(f"chunk-{i}", chunk_index=i) for i in range(2)]
         embeddings = [make_embedding(i) for i in range(2)]
 
-        await vector_store.ingest("doc-0", chunks, embeddings)
+        await vector_store.ingest(chunks, embeddings)
 
         result = await db_session.execute(
             select(DocumentChunkRow).where(DocumentChunkRow.document_id == "doc-0")
@@ -55,8 +59,8 @@ class TestIngestIntegration:
         updated_chunk = make_chunk("chunk-0", text="Updated text")
         embedding = make_embedding(0)
 
-        await vector_store.ingest("doc-0", [chunk], [embedding])
-        await vector_store.ingest("doc-0", [updated_chunk], [embedding])
+        await vector_store.ingest([chunk], [embedding])
+        await vector_store.ingest([updated_chunk], [embedding])
 
         result = await db_session.execute(
             select(DocumentChunkRow).where(DocumentChunkRow.id == "chunk-0")
@@ -74,7 +78,7 @@ class TestSearchIntegration:
         """The chunk whose embedding is closest to the query ranks first."""
         chunks = [make_chunk(f"chunk-{i}", chunk_index=i) for i in range(3)]
         embeddings = [make_embedding(i) for i in range(3)]
-        await vector_store.ingest("doc-0", chunks, embeddings)
+        await vector_store.ingest(chunks, embeddings)
 
         # Query identical to chunk-2's embedding, chunk-2 should rank first
         results = await vector_store.search(make_embedding(2), top_k=3)
@@ -89,7 +93,7 @@ class TestSearchIntegration:
         """Chunks below the cosine similarity threshold are excluded."""
         chunks = [make_chunk(f"chunk-{i}", chunk_index=i) for i in range(3)]
         embeddings = [make_embedding(i) for i in range(3)]
-        await vector_store.ingest("doc-threshold", chunks, embeddings)
+        await vector_store.ingest(chunks, embeddings)
 
         # Query = e_0, similarity to chunk-0 ≈ 1.0
         results = await vector_store.search(make_embedding(0), top_k=10, threshold=0.9)
@@ -104,7 +108,7 @@ class TestSearchIntegration:
     ) -> None:
         chunks = [make_chunk(f"chunk-tk-{i}", chunk_index=i) for i in range(5)]
         embeddings = [make_embedding(i) for i in range(5)]
-        await vector_store.ingest("doc-0", chunks, embeddings)
+        await vector_store.ingest(chunks, embeddings)
 
         results = await vector_store.search(make_embedding(0), top_k=2)
 
@@ -117,7 +121,7 @@ class TestSearchIntegration:
         chunk_a = make_chunk("chunk-0", source_name="docs/a.md", chunk_index=0)
         chunk_b = make_chunk("chunk-1", source_name="docs/b.md", chunk_index=1)
         embeddings = [make_embedding(0), make_embedding(0)]  # same direction
-        await vector_store.ingest("doc-0", [chunk_a, chunk_b], embeddings)
+        await vector_store.ingest([chunk_a, chunk_b], embeddings)
 
         results = await vector_store.search(
             make_embedding(0), top_k=10, filters={"source_name": "docs/a.md"}

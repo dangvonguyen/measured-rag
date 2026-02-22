@@ -127,8 +127,8 @@ class TestMetadataValidation:
             metadata={"document_id": doc.document_id, "source_name": doc.source_name},
         )
 
-        required_fields = {"document_id", "source_name", "chunk_index", "created_at"}
         for chunk in chunks:
-            for field in required_fields:
-                assert field in chunk.metadata
+            assert chunk.document_id
+            assert chunk.source_name
+            assert chunk.chunk_index >= 0
             assert chunk.token_count > 0

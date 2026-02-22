@@ -32,7 +32,6 @@ class VectorStore(ABC):
     @abstractmethod
     async def ingest(
         self,
-        document_id: str,
         chunks: list[DocumentChunk],
         embeddings: list[list[float]],
     ) -> None: ...

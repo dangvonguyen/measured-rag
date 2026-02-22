@@ -28,7 +28,7 @@ class TestChunkTokenLimits:
 
         for chunk in chunks:
             assert chunk.token_count <= chunk_size, (
-                f"Chunk {chunk.metadata['chunk_index']} has {chunk.token_count} "
+                f"Chunk {chunk.chunk_index} has {chunk.token_count} "
                 f"tokens, exceeds limit of {chunk_size}"
             )
 
@@ -47,7 +47,7 @@ class TestChunkTokenLimits:
         for chunk in chunks:
             actual = len(tokenizer.encode(chunk.text))
             assert chunk.token_count == actual, (
-                f"Chunk {chunk.metadata['chunk_index']}: stored={chunk.token_count}, "
+                f"Chunk {chunk.chunk_index}: stored={chunk.token_count}, "
                 f"actual={actual}"
             )
 
@@ -126,8 +126,8 @@ class TestMetadataPropagation:
         chunks = chunker.chunk(sample_tos_text, sample_metadata)
 
         for chunk in chunks:
-            assert chunk.metadata["document_id"] == sample_metadata["document_id"]
-            assert chunk.metadata["source_name"] == sample_metadata["source_name"]
+            assert chunk.document_id == sample_metadata["document_id"]
+            assert chunk.source_name == sample_metadata["source_name"]
             assert chunk.metadata["page_number"] == sample_metadata["page_number"]
 
     def test_chunk_index_sequential(
@@ -141,7 +141,7 @@ class TestMetadataPropagation:
         """
         chunker = SentenceChunker(tokenizer=tokenizer, chunk_size=32, chunk_overlap=8)
         chunks = chunker.chunk(sample_tos_text, sample_metadata)
-        indices = [c.metadata["chunk_index"] for c in chunks]
+        indices = [c.chunk_index for c in chunks]
         assert indices == list(range(len(chunks)))
 
 

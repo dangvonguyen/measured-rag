@@ -1,5 +1,4 @@
 import uuid
-from datetime import UTC, datetime
 from typing import Any
 
 import tiktoken
@@ -42,15 +41,12 @@ class SentenceChunker(DocumentChunker):
             token_count = len(self._tokenizer.encode(chunk_text))
             chunk = DocumentChunk(
                 chunk_id=str(uuid.uuid4()),
+                document_id=str(metadata.get("document_id", "")),
+                source_name=str(metadata.get("source_name", "")),
+                chunk_index=idx,
                 text=chunk_text,
                 token_count=token_count,
-                metadata={
-                    "document_id": str(metadata.get("document_id", "")),
-                    "source_name": str(metadata.get("source_name", "")),
-                    "page_number": metadata.get("page_number"),
-                    "chunk_index": idx,
-                    "created_at": datetime.now(UTC).isoformat(),
-                },
+                metadata={"page_number": metadata.get("page_number")},
             )
             chunks.append(chunk)
 

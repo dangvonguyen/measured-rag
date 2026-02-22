@@ -76,7 +76,7 @@ class IngestionPipeline:
         # Batch embed and store
         embeddings = await self._embedder.embed_batch([c.text for c in chunks])
 
-        await self._vector_store.ingest(doc.document_id, chunks, embeddings)
+        await self._vector_store.ingest(chunks, embeddings)
 
         logger.info(
             "Ingested '%s': %d chunks (replaced %d old)",
