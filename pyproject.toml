@@ -40,6 +40,7 @@ addopts = [
 markers = [
 	"unit: fast, no external deps",
 	"integration: requires DB and/or API calls",
+	"e2e: full end-to-end flows",
 ]
 
 [tool.mypy]
