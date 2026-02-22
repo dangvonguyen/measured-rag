@@ -60,7 +60,7 @@ class TestLoadedDocumentShape:
     def test_document_metadata_fields(self, tmp_path: Path) -> None:
         """Returned document contains correct content and metadata shape."""
         ext = next(iter(DEFAULT_SUPPORTED_EXTENSIONS))
-        filename = f"test_doc.{ext}"
+        filename = f"test_doc{ext}"
         content = "Standard test content."
         file_path = tmp_path / filename
         file_path.write_text(content, encoding="utf-8")
@@ -111,7 +111,7 @@ class TestDirectoryLoading:
         """Loading a directory returns as many docs as supported files in it."""
         extensions = list(DEFAULT_SUPPORTED_EXTENSIONS)
         for i, ext in enumerate(extensions):
-            (tmp_path / f"test_{i}.{ext}").write_text(f"Content {i}", encoding="utf-8")
+            (tmp_path / f"test_{i}{ext}").write_text(f"Content {i}", encoding="utf-8")
 
         (tmp_path / "ignored.unsupported").write_text("Ignore", encoding="utf-8")
 
@@ -136,7 +136,7 @@ class TestDirectoryLoading:
         valid_ext = next(iter(DEFAULT_SUPPORTED_EXTENSIONS))
         invalid_ext = f"{valid_ext}_invalid"
 
-        (tmp_path / f"valid.{valid_ext}").write_text("Valid", encoding="utf-8")
+        (tmp_path / f"valid{valid_ext}").write_text("Valid", encoding="utf-8")
         (tmp_path / f"invalid.{invalid_ext}").write_text("Skip", encoding="utf-8")
 
         result = make_loader().load(tmp_path)

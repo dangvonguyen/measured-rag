@@ -75,4 +75,4 @@ class LlamaIndexDocumentLoader(DocumentLoader):
         )
 
     def _create_document_id(self, file_path: Path) -> str:
-        return str(uuid.uuid5(uuid.NAMESPACE_URL, str(file_path.resolve())))
+        return str(uuid.uuid5(uuid.NAMESPACE_URL, file_path.name))

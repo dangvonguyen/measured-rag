@@ -10,7 +10,7 @@ def sample_text() -> str:
 
 @pytest.fixture(scope="module")
 def expected_dimension(embedder: OpenAIEmbeddingService) -> int:
-    return embedder._dimension
+    return embedder.dimension
 
 
 @pytest.mark.integration
