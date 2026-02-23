@@ -23,7 +23,7 @@ def test_db_url(test_db_name: str) -> str:
     return PostgresDsn.build(
         scheme="postgresql+asyncpg",
         username=settings.POSTGRES_USER,
-        password=settings.POSTGRES_PASSWORD,
+        password=settings.POSTGRES_PASSWORD.get_secret_value(),
         host=settings.POSTGRES_HOST,
         port=settings.POSTGRES_PORT,
         path=test_db_name,

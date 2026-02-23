@@ -27,7 +27,9 @@ class OpenAIEmbeddingService(EmbeddingService):
         self._model = model
         self._dimension = dimension
         self._max_tokens = max_tokens
-        self._client = client or AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        self._client = client or AsyncOpenAI(
+            api_key=settings.OPENAI_API_KEY.get_secret_value()
+        )
         self._tokenizer = tokenizer or tiktoken.get_encoding("cl100k_base")
 
     async def embed_text(self, text: str) -> list[float]:

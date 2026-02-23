@@ -1,4 +1,4 @@
-from pydantic import PostgresDsn, computed_field
+from pydantic import PostgresDsn, SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,7 +15,7 @@ class CommonSettings(BaseSettings):
     POSTGRES_HOST: str
     POSTGRES_PORT: int
     POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
+    POSTGRES_PASSWORD: SecretStr
     POSTGRES_DB: str
 
     @computed_field  # type: ignore[prop-decorator]
@@ -24,7 +24,7 @@ class CommonSettings(BaseSettings):
         return PostgresDsn.build(
             scheme="postgresql+asyncpg",
             username=self.POSTGRES_USER,
-            password=self.POSTGRES_PASSWORD,
+            password=self.POSTGRES_PASSWORD.get_secret_value(),
             host=self.POSTGRES_HOST,
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
@@ -35,7 +35,7 @@ class CommonSettings(BaseSettings):
     DB_MAX_OVERFLOW: int = 10
 
     # API keys
-    OPENAI_API_KEY: str
+    OPENAI_API_KEY: SecretStr
 
 
 # Singleton instance
