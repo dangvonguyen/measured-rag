@@ -5,7 +5,7 @@ services:
     image: pgvector/pgvector:pg18
     container_name: measured-rag-postgres
     env_file:
-      - ../.env.docker
+      - ../.env
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
