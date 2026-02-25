@@ -1,9 +1,10 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from rag.core.interfaces import VectorStore
@@ -120,7 +121,7 @@ class PGVectorStore(VectorStore):
         ]
 
     @asynccontextmanager
-    async def transaction(self) -> AsyncGenerator[None, None]:
+    async def transaction(self) -> AsyncGenerator[None]:
         """Wrap a unit of work in a savepoint."""
         async with self._session.begin_nested():
             yield
@@ -130,6 +131,6 @@ class PGVectorStore(VectorStore):
         stmt = delete(DocumentChunkRow).where(
             DocumentChunkRow.source_name == source_name
         )
-        result = await self._session.execute(stmt)
+        result = cast(CursorResult[Any], await self._session.execute(stmt))
         await self._session.flush()
         return result.rowcount
