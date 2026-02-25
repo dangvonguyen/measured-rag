@@ -4,13 +4,10 @@ import tiktoken
 from openai import AsyncOpenAI
 
 from common.config import get_settings
+from rag.core.config import EMBEDDING_DIMENSION, get_rag_settings
 from rag.core.interfaces import EmbeddingService
 
 logger = logging.getLogger(__name__)
-
-_DEFAULT_MODEL = "text-embedding-3-small"
-_DEFAULT_DIMENSION = 1536
-_DEFAULT_MAX_TOKENS = 8191
 
 
 class OpenAIEmbeddingService(EmbeddingService):
@@ -18,15 +15,16 @@ class OpenAIEmbeddingService(EmbeddingService):
 
     def __init__(
         self,
-        model: str = _DEFAULT_MODEL,
-        dimension: int = _DEFAULT_DIMENSION,
-        max_tokens: int = _DEFAULT_MAX_TOKENS,
+        model: str | None = None,
+        dimension: int | None = None,
+        max_tokens: int | None = None,
         client: AsyncOpenAI | None = None,
         tokenizer: tiktoken.Encoding | None = None,
     ) -> None:
-        self._model = model
-        self._dimension = dimension
-        self._max_tokens = max_tokens
+        rag = get_rag_settings()
+        self._model = model or rag.EMBEDDING_MODEL
+        self._dimension = dimension or EMBEDDING_DIMENSION
+        self._max_tokens = max_tokens or rag.EMBEDDING_MAX_TOKENS
         self._client = client or AsyncOpenAI(
             api_key=get_settings().OPENAI_API_KEY.get_secret_value()
         )
