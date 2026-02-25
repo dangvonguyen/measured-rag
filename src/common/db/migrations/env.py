@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 # Add project root to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from common.config import settings
+from common.config import get_settings
 from common.db import base
 
 # Import all ORM models so Alembic can detect them
@@ -30,7 +30,7 @@ target_metadata = base.Base.metadata
 
 
 def get_url() -> str:
-    return settings.POSTGRES_URL
+    return get_settings().POSTGRES_URL
 
 
 def get_next_revision_number() -> str:

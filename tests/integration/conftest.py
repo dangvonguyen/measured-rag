@@ -6,7 +6,7 @@ from pydantic import PostgresDsn
 from sqlalchemy import NullPool, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
-from common.config import settings
+from common.config import get_settings
 from common.db.base import Base
 from rag.db import models  # noqa: F401
 from rag.services.embedder import OpenAIEmbeddingService
@@ -15,17 +15,18 @@ from rag.services.vector_store import PGVectorStore
 
 @pytest.fixture(scope="session")
 def test_db_name() -> str:
-    return f"{settings.POSTGRES_DB}_test"
+    return f"{get_settings().POSTGRES_DB}_test"
 
 
 @pytest.fixture(scope="session")
 def test_db_url(test_db_name: str) -> str:
+    s = get_settings()
     return PostgresDsn.build(
         scheme="postgresql+asyncpg",
-        username=settings.POSTGRES_USER,
-        password=settings.POSTGRES_PASSWORD.get_secret_value(),
-        host=settings.POSTGRES_HOST,
-        port=settings.POSTGRES_PORT,
+        username=s.POSTGRES_USER,
+        password=s.POSTGRES_PASSWORD.get_secret_value(),
+        host=s.POSTGRES_HOST,
+        port=s.POSTGRES_PORT,
         path=test_db_name,
     ).encoded_string()
 
@@ -34,7 +35,7 @@ def test_db_url(test_db_name: str) -> str:
 async def test_database(test_db_name: str) -> AsyncGenerator[None]:
     """Create test DB before session, drop it after."""
     admin_engine = create_async_engine(
-        settings.POSTGRES_URL, poolclass=NullPool, isolation_level="AUTOCOMMIT"
+        get_settings().POSTGRES_URL, poolclass=NullPool, isolation_level="AUTOCOMMIT"
     )
     async with admin_engine.connect() as conn:
         await conn.execute(text(f"DROP DATABASE IF EXISTS {test_db_name}"))
@@ -44,7 +45,7 @@ async def test_database(test_db_name: str) -> AsyncGenerator[None]:
     yield
 
     admin_engine = create_async_engine(
-        settings.POSTGRES_URL, poolclass=NullPool, isolation_level="AUTOCOMMIT"
+        get_settings().POSTGRES_URL, poolclass=NullPool, isolation_level="AUTOCOMMIT"
     )
     async with admin_engine.connect() as conn:
         await conn.execute(text(f"DROP DATABASE IF EXISTS {test_db_name}"))

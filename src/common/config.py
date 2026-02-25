@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from pydantic import PostgresDsn, SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -38,5 +40,9 @@ class CommonSettings(BaseSettings):
     OPENAI_API_KEY: SecretStr
 
 
-# Singleton instance
-settings = CommonSettings()  # type: ignore[call-arg]
+@lru_cache(maxsize=1)
+def get_settings() -> CommonSettings:
+    """
+    Return the singleton settings instance.
+    """
+    return CommonSettings()  # type: ignore[call-arg]
