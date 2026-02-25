@@ -35,14 +35,16 @@ class SentenceChunker(DocumentChunker):
         if not text or not text.strip():
             return []
 
+        document_id = str(metadata.get("document_id", ""))
+        source_name = str(metadata.get("source_name", ""))
         chunk_texts = self._splitter.split_text(text)
         chunks: list[DocumentChunk] = []
         for idx, chunk_text in enumerate(chunk_texts):
             token_count = len(self._tokenizer.encode(chunk_text))
             chunk = DocumentChunk(
-                chunk_id=str(uuid.uuid4()),
-                document_id=str(metadata.get("document_id", "")),
-                source_name=str(metadata.get("source_name", "")),
+                chunk_id=self._make_chunk_id(document_id, idx),
+                document_id=document_id,
+                source_name=source_name,
                 chunk_index=idx,
                 text=chunk_text,
                 token_count=token_count,
@@ -51,3 +53,8 @@ class SentenceChunker(DocumentChunker):
             chunks.append(chunk)
 
         return chunks
+
+    @staticmethod
+    def _make_chunk_id(document_id: str, chunk_index: int) -> str:
+        """Deterministic chunk ID derived from (document_id, chunk_index)."""
+        return str(uuid.uuid5(uuid.NAMESPACE_URL, f"{document_id}:{chunk_index}"))
