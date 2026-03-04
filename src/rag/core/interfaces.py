@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
 from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 from typing import Any
@@ -82,3 +83,8 @@ class PromptBuilder(ABC):
         chunks: list[RetrievedChunk],
         query: str,
     ) -> list[ChatMessage]: ...
+
+
+class LLMService(ABC):
+    @abstractmethod
+    def complete_stream(self, messages: list[ChatMessage]) -> AsyncIterator[str]: ...

@@ -18,6 +18,11 @@ class RAGSettings(BaseSettings):
     EMBEDDING_MODEL: str = "text-embedding-3-small"
     EMBEDDING_MAX_TOKENS: int = 8191
 
+    # LLM
+    LLM_MODEL: str = "gpt-4o-mini"
+    LLM_MAX_TOKENS: int = 4096
+    LLM_TEMPERATURE: float = 0.1
+
 
 @lru_cache(maxsize=1)
 def get_rag_settings() -> RAGSettings:
