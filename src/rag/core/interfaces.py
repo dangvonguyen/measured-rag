@@ -3,7 +3,13 @@ from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 from typing import Any
 
-from rag.core.models import DocumentChunk, LoadedDocument, RetrievedChunk
+from rag.core.models import (
+    ChatMessage,
+    DocumentChunk,
+    LoadedDocument,
+    Message,
+    RetrievedChunk,
+)
 
 
 class DocumentLoader(ABC):
@@ -66,3 +72,13 @@ class RetrieverService(ABC):
         threshold: float,
         filters: dict[str, Any] | None = None,
     ) -> list[RetrievedChunk]: ...
+
+
+class PromptBuilder(ABC):
+    @abstractmethod
+    def build(
+        self,
+        history: list[Message],
+        chunks: list[RetrievedChunk],
+        query: str,
+    ) -> list[ChatMessage]: ...
