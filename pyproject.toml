@@ -4,7 +4,18 @@ version = "0.1.0"
 description = "RAG system with evaluation-first methodology"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["pydantic>=2.12.5"]
+dependencies = [
+	"pydantic>=2.12.5",
+	"pydantic-settings>=2.12.0",
+	"fastapi[standard]>=0.128.5",
+	"sqlalchemy[asyncio]>=2.0.46",
+	"asyncpg>=0.31.0",
+	"alembic>=1.18.3",
+	"pgvector>=0.4.2",
+	"openai>=2.17.0",
+	"tiktoken>=0.12.0",
+	"llama-index-core>=0.14.14",
+]
 
 [dependency-groups]
 dev = [
@@ -16,7 +27,9 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
+pythonpath = ["src"]
 testpaths = ["tests"]
+asyncio_mode = "auto"
 addopts = [
 	"-ra",
 	"--strict-config",
@@ -27,6 +40,7 @@ addopts = [
 markers = [
 	"unit: fast, no external deps",
 	"integration: requires DB and/or API calls",
+	"e2e: full end-to-end flows",
 ]
 
 [tool.mypy]

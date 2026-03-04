@@ -1,0 +1,1 @@
+All disputes shall be resolved through binding arbitration in the State of Delaware.
