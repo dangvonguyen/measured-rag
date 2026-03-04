@@ -1,5 +1,6 @@
-from rag.core.interfaces import PromptBuilder
-from rag.core.models import ChatMessage, Message, RetrievedChunk
+from chat.core.interfaces import IPromptBuilder
+from chat.core.schemas import ChatMessage, Message
+from rag.core.models import RetrievedChunk
 
 DEFAULT_SYSTEM_PROMPT = (
     "You are a helpful assistant. Answer only from the provided context. "
@@ -8,7 +9,7 @@ DEFAULT_SYSTEM_PROMPT = (
 )
 
 
-class StandardPromptBuilder(PromptBuilder):
+class StandardPromptBuilder(IPromptBuilder):
     def __init__(self, system_prompt: str | None = None) -> None:
         self._system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
 

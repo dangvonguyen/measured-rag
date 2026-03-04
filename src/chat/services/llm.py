@@ -5,15 +5,15 @@ from typing import cast
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionChunk, ChatCompletionMessageParam
 
+from chat.core.config import get_chat_settings
+from chat.core.interfaces import ILLMService
+from chat.core.schemas import ChatMessage
 from common.config import get_settings
-from rag.core.config import get_rag_settings
-from rag.core.interfaces import LLMService
-from rag.core.models import ChatMessage
 
 logger = logging.getLogger(__name__)
 
 
-class OpenAILLMService(LLMService):
+class OpenAILLMService(ILLMService):
     def __init__(
         self,
         model: str | None = None,
@@ -21,13 +21,13 @@ class OpenAILLMService(LLMService):
         max_tokens: int | None = None,
         client: AsyncOpenAI | None = None,
     ) -> None:
-        rag = get_rag_settings()
+        chat_settings = get_chat_settings()
 
-        self._model = model or rag.LLM_MODEL
+        self._model = model or chat_settings.LLM_MODEL
         self._temperature = (
-            temperature if temperature is not None else rag.LLM_TEMPERATURE
+            temperature if temperature is not None else chat_settings.LLM_TEMPERATURE
         )
-        self._max_tokens = max_tokens or rag.LLM_MAX_TOKENS
+        self._max_tokens = max_tokens or chat_settings.LLM_MAX_TOKENS
 
         self._client = client or AsyncOpenAI(
             api_key=get_settings().OPENAI_API_KEY.get_secret_value()

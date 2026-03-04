@@ -3,8 +3,9 @@ from uuid import uuid4
 
 import pytest
 
-from rag.core.models import ChatMessage, Message, RetrievedChunk
-from rag.services.prompt_builder import StandardPromptBuilder
+from chat.core.schemas import ChatMessage, Message
+from chat.utils.prompt_builder import StandardPromptBuilder
+from rag.core.models import RetrievedChunk
 
 
 @pytest.fixture

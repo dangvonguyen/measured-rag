@@ -3,8 +3,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from rag.core.models import ChatMessage
-from rag.services.llm import OpenAILLMService
+from chat.core.schemas import ChatMessage
+from chat.services.llm import OpenAILLMService
 
 
 def _make_chunk(content: str | None) -> MagicMock:

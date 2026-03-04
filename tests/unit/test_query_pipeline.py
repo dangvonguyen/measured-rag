@@ -5,9 +5,10 @@ from unittest.mock import AsyncMock, MagicMock, call
 
 import pytest
 
+from chat.core.schemas import ChatMessage, Message, RAGResponseLog
+from chat.pipeline.query import QueryPipeline
 from rag.core.config import RAGSettings
-from rag.core.models import ChatMessage, Message, RAGResponseLog, RetrievedChunk
-from rag.pipeline.query import QueryPipeline
+from rag.core.models import RetrievedChunk
 
 
 def _msg(

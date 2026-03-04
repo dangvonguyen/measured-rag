@@ -4,15 +4,10 @@ from uuid import UUID
 
 import tiktoken
 
+from chat.core.interfaces import IConversationRepository, ILLMService, IPromptBuilder
+from chat.core.schemas import RAGResponseLog
 from rag.core.config import RAGSettings
-from rag.core.interfaces import (
-    ConversationRepository,
-    EmbeddingService,
-    LLMService,
-    PromptBuilder,
-    RetrieverService,
-)
-from rag.core.models import RAGResponseLog
+from rag.core.interfaces import EmbeddingService, RetrieverService
 
 
 class QueryPipeline:
@@ -22,9 +17,9 @@ class QueryPipeline:
         self,
         embedder: EmbeddingService,
         retriever: RetrieverService,
-        prompt_builder: PromptBuilder,
-        llm: LLMService,
-        conversation_repo: ConversationRepository,
+        prompt_builder: IPromptBuilder,
+        llm: ILLMService,
+        conversation_repo: IConversationRepository,
         settings: RAGSettings,
     ) -> None:
         self._embedder = embedder
