@@ -8,9 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from common.config import get_settings
 from common.db.base import Base
-from rag.db import models  # noqa: F401
 from rag.services.embedder import OpenAIEmbeddingService
 from rag.services.vector_store import PGVectorStore
+
+from chat.db import models as chat_models  # isort: skip # noqa: F401
+from rag.db import models as rag_models  # isort: skip # noqa: F401
 
 
 @pytest.fixture(scope="session")

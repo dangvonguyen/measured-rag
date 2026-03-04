@@ -4,12 +4,12 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from rag.core.interfaces import ConversationRepository
-from rag.core.models import Conversation, Message, RAGResponseLog
-from rag.db.models import ConversationRow, MessageRole, MessageRow, RAGResponseRow
+from chat.core.interfaces import IConversationRepository
+from chat.core.schemas import Conversation, Message, RAGResponseLog
+from chat.db.models import ConversationRow, MessageRole, MessageRow, RAGResponseRow
 
 
-class PGConversationRepository(ConversationRepository):
+class PGConversationRepository(IConversationRepository):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 

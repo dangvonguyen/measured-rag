@@ -122,3 +122,4 @@ def downgrade() -> None:
     )
     op.drop_table("messages", schema="rag")
     op.drop_table("conversations", schema="rag")
+    op.execute("DROP TYPE IF EXISTS rag.messagerole")

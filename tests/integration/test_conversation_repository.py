@@ -5,9 +5,9 @@ import pytest
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from rag.core.models import Message, RAGResponseLog
-from rag.db.models import MessageRow
-from rag.db.repositories.conversation import PGConversationRepository
+from chat.core.schemas import Message, RAGResponseLog
+from chat.db.models import MessageRow
+from chat.db.repositories.conversation import PGConversationRepository
 
 
 @pytest.fixture
