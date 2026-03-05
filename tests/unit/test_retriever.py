@@ -3,8 +3,8 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from rag.core.models import RetrievedChunk
-from rag.services.retriever import VectorRetrieverService
+from rag.core.schemas import RetrievedChunk
+from rag.retrieval.retriever import RetrieverService
 
 
 @pytest.fixture
@@ -33,15 +33,15 @@ def mock_vector_store() -> AsyncMock:
 
 
 @pytest.fixture
-def retriever(mock_vector_store: AsyncMock) -> VectorRetrieverService:
-    return VectorRetrieverService(mock_vector_store)
+def retriever(mock_vector_store: AsyncMock) -> RetrieverService:
+    return RetrieverService(mock_vector_store)
 
 
 @pytest.mark.unit
 class TestRetrieveDelegation:
     async def test_delegates_with_strict_signature(
         self,
-        retriever: VectorRetrieverService,
+        retriever: RetrieverService,
         mock_vector_store: AsyncMock,
         query_vector: list[float],
     ) -> None:
@@ -59,7 +59,7 @@ class TestRetrieveDelegation:
 
     async def test_delegates_filters(
         self,
-        retriever: VectorRetrieverService,
+        retriever: RetrieverService,
         mock_vector_store: AsyncMock,
         query_vector: list[float],
     ) -> None:
@@ -77,7 +77,7 @@ class TestRetrieveDelegation:
 class TestRetrieveReturnValue:
     async def test_returns_chunks_unchanged(
         self,
-        retriever: VectorRetrieverService,
+        retriever: RetrieverService,
         mock_vector_store: AsyncMock,
         query_vector: list[float],
         sample_chunk: RetrievedChunk,
@@ -93,7 +93,7 @@ class TestRetrieveReturnValue:
 
     async def test_propagates_store_exceptions(
         self,
-        retriever: VectorRetrieverService,
+        retriever: RetrieverService,
         mock_vector_store: AsyncMock,
         query_vector: list[float],
     ) -> None:
@@ -110,7 +110,7 @@ class TestRetrieveReturnValue:
 class TestRetrieveLogging:
     async def test_logs_retrieval_metadata(
         self,
-        retriever: VectorRetrieverService,
+        retriever: RetrieverService,
         mock_vector_store: AsyncMock,
         query_vector: list[float],
         sample_chunk: RetrievedChunk,
@@ -121,7 +121,7 @@ class TestRetrieveLogging:
         """
         mock_vector_store.search.return_value = [sample_chunk]
 
-        with caplog.at_level(logging.INFO, logger="rag.services.retriever"):
+        with caplog.at_level(logging.INFO, logger="rag.retrieval.retriever"):
             await retriever.retrieve(query_vector, top_k=1, threshold=0.0)
 
         assert len(caplog.records) > 0
@@ -134,7 +134,7 @@ class TestRetrieveLogging:
 
     async def test_logs_none_score_on_empty(
         self,
-        retriever: VectorRetrieverService,
+        retriever: RetrieverService,
         mock_vector_store: AsyncMock,
         query_vector: list[float],
         caplog: pytest.LogCaptureFixture,
@@ -144,7 +144,7 @@ class TestRetrieveLogging:
         """
         mock_vector_store.search.return_value = []
 
-        with caplog.at_level(logging.INFO, logger="rag.services.retriever"):
+        with caplog.at_level(logging.INFO, logger="rag.retrieval.retriever"):
             await retriever.retrieve(query_vector, top_k=1, threshold=0.0)
 
         assert "top_score=none" in caplog.text

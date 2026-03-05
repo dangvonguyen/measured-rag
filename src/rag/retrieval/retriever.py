@@ -2,14 +2,14 @@ import logging
 import time
 from typing import Any
 
-from rag.core.interfaces import RetrieverService, VectorStore
-from rag.core.models import RetrievedChunk
+from rag.core.interfaces import IRetrieverService, IVectorStore
+from rag.core.schemas import RetrievedChunk
 
 logger = logging.getLogger(__name__)
 
 
-class VectorRetrieverService(RetrieverService):
-    def __init__(self, vector_store: VectorStore) -> None:
+class RetrieverService(IRetrieverService):
+    def __init__(self, vector_store: IVectorStore) -> None:
         self._vector_store = vector_store
 
     async def retrieve(

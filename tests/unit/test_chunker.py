@@ -3,8 +3,8 @@ from typing import Any
 import pytest
 import tiktoken
 
-from rag.core.models import DocumentChunk
-from rag.services.chunker import SentenceChunker
+from rag.core.schemas import DocumentChunk
+from rag.ingestion.chunker import SentenceChunker
 
 
 @pytest.mark.unit

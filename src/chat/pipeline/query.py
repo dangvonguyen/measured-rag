@@ -7,7 +7,7 @@ import tiktoken
 from chat.core.interfaces import IConversationRepository, ILLMService, IPromptBuilder
 from chat.core.schemas import RAGResponseLog
 from rag.core.config import RAGSettings
-from rag.core.interfaces import EmbeddingService, RetrieverService
+from rag.core.interfaces import IEmbeddingService, IRetrieverService
 
 
 class QueryPipeline:
@@ -15,8 +15,8 @@ class QueryPipeline:
 
     def __init__(
         self,
-        embedder: EmbeddingService,
-        retriever: RetrieverService,
+        embedder: IEmbeddingService,
+        retriever: IRetrieverService,
         prompt_builder: IPromptBuilder,
         llm: ILLMService,
         conversation_repo: IConversationRepository,

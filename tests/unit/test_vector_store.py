@@ -1,9 +1,10 @@
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from rag.core.models import DocumentChunk, RetrievedChunk
-from rag.services.vector_store import PGVectorStore
+from rag.core.schemas import DocumentChunk, RetrievedChunk
+from rag.db.repositories.vector_store import VectorStore
 
 
 def make_chunk(
@@ -33,7 +34,7 @@ def make_db_row(
     source_name: str = "test.md",
     chunk_index: int = 0,
     text: str = "Sample text.",
-    meta: dict | None = None,
+    meta: dict[str, Any] | None = None,
     score: float = 0.9,
 ) -> MagicMock:
     row = MagicMock()
@@ -47,7 +48,7 @@ def make_db_row(
     return row
 
 
-def mock_execute_result(rows: list) -> MagicMock:
+def mock_execute_result(rows: list[Any]) -> MagicMock:
     result = MagicMock()
     result.all.return_value = rows
     return result
@@ -62,8 +63,8 @@ def mock_session() -> MagicMock:
 
 
 @pytest.fixture
-def vector_store(mock_session: MagicMock) -> PGVectorStore:
-    return PGVectorStore(mock_session)
+def vector_store(mock_session: MagicMock) -> VectorStore:
+    return VectorStore(mock_session)
 
 
 @pytest.mark.unit
@@ -71,7 +72,7 @@ class TestIngest:
     """ingest() maps chunks, embeddings to DB rows and persists them."""
 
     async def test_ingest_executes_bulk_upsert(
-        self, vector_store: PGVectorStore, mock_session: MagicMock
+        self, vector_store: VectorStore, mock_session: MagicMock
     ) -> None:
         """
         Verifies ingestion uses a single bulk execute.
@@ -85,7 +86,7 @@ class TestIngest:
         assert mock_session.flush.await_count == 1
 
     async def test_ingest_empty_chunks_skips_db_calls(
-        self, vector_store: PGVectorStore, mock_session: MagicMock
+        self, vector_store: VectorStore, mock_session: MagicMock
     ) -> None:
         """
         Verifies empty inputs create no calls.
@@ -96,7 +97,7 @@ class TestIngest:
         mock_session.flush.assert_not_awaited()
 
     async def test_ingest_mismatched_lengths_raises(
-        self, vector_store: PGVectorStore
+        self, vector_store: VectorStore
     ) -> None:
         """
         Verifies strict zipping prevents unaligned vectors.
@@ -115,7 +116,7 @@ class TestSearch:
     """search() returns chunks sorted by similarity descending."""
 
     async def test_search_returns_retrieved_chunk_instances(
-        self, vector_store: PGVectorStore, mock_session: MagicMock
+        self, vector_store: VectorStore, mock_session: MagicMock
     ) -> None:
         mock_session.execute.return_value = mock_execute_result([make_db_row()])
 
@@ -125,7 +126,7 @@ class TestSearch:
         assert isinstance(results[0], RetrievedChunk)
 
     async def test_search_maps_all_fields(
-        self, vector_store: PGVectorStore, mock_session: MagicMock
+        self, vector_store: VectorStore, mock_session: MagicMock
     ) -> None:
         db_row = make_db_row(
             chunk_id="chunk-5",
@@ -150,7 +151,7 @@ class TestSearch:
         assert r.score == 0.75
 
     async def test_search_empty_db_returns_empty_list(
-        self, vector_store: PGVectorStore, mock_session: MagicMock
+        self, vector_store: VectorStore, mock_session: MagicMock
     ) -> None:
         mock_session.execute.return_value = mock_execute_result([])
 
@@ -159,7 +160,7 @@ class TestSearch:
         assert results == []
 
     async def test_search_calls_execute_once(
-        self, vector_store: PGVectorStore, mock_session: MagicMock
+        self, vector_store: VectorStore, mock_session: MagicMock
     ) -> None:
         await vector_store.search(make_embedding(), top_k=5)
 

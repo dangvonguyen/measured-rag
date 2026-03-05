@@ -2,9 +2,9 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from rag.core.models import DocumentChunk, RetrievedChunk
+from rag.core.schemas import DocumentChunk, RetrievedChunk
 from rag.db.models import DocumentChunkRow
-from rag.services.vector_store import PGVectorStore
+from rag.db.repositories.vector_store import VectorStore
 
 DIMENSION = 1536
 
@@ -37,7 +37,7 @@ def make_embedding(index: int) -> list[float]:
 @pytest.mark.integration
 class TestIngestIntegration:
     async def test_ingest_persists_rows_to_db(
-        self, vector_store: PGVectorStore, db_session: AsyncSession
+        self, vector_store: VectorStore, db_session: AsyncSession
     ) -> None:
         chunks = [make_chunk(f"chunk-{i}", chunk_index=i) for i in range(2)]
         embeddings = [make_embedding(i) for i in range(2)]
@@ -52,7 +52,7 @@ class TestIngestIntegration:
         assert {r.id for r in rows} == {"chunk-0", "chunk-1"}
 
     async def test_ingest_upsert_updates_existing_chunk(
-        self, vector_store: PGVectorStore, db_session: AsyncSession
+        self, vector_store: VectorStore, db_session: AsyncSession
     ) -> None:
         """Re-ingesting the same chunk_id replaces the row, not duplicates it."""
         chunk = make_chunk("chunk-0", text="Original text")
@@ -73,7 +73,7 @@ class TestIngestIntegration:
 @pytest.mark.integration
 class TestSearchIntegration:
     async def test_search_returns_nearest_vector(
-        self, vector_store: PGVectorStore
+        self, vector_store: VectorStore
     ) -> None:
         """The chunk whose embedding is closest to the query ranks first."""
         chunks = [make_chunk(f"chunk-{i}", chunk_index=i) for i in range(3)]
@@ -88,7 +88,7 @@ class TestSearchIntegration:
         assert results[0].chunk_id == "chunk-2"
 
     async def test_search_respects_score_threshold(
-        self, vector_store: PGVectorStore
+        self, vector_store: VectorStore
     ) -> None:
         """Chunks below the cosine similarity threshold are excluded."""
         chunks = [make_chunk(f"chunk-{i}", chunk_index=i) for i in range(3)]
@@ -104,7 +104,7 @@ class TestSearchIntegration:
         assert "chunk-2" not in ids
 
     async def test_search_limits_results_to_top_k(
-        self, vector_store: PGVectorStore
+        self, vector_store: VectorStore
     ) -> None:
         chunks = [make_chunk(f"chunk-tk-{i}", chunk_index=i) for i in range(5)]
         embeddings = [make_embedding(i) for i in range(5)]
@@ -114,9 +114,7 @@ class TestSearchIntegration:
 
         assert len(results) <= 2
 
-    async def test_search_with_metadata_filter(
-        self, vector_store: PGVectorStore
-    ) -> None:
+    async def test_search_with_metadata_filter(self, vector_store: VectorStore) -> None:
         """filters kwarg restricts results to matching source_name."""
         chunk_a = make_chunk("chunk-0", source_name="docs/a.md", chunk_index=0)
         chunk_b = make_chunk("chunk-1", source_name="docs/b.md", chunk_index=1)

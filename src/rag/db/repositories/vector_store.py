@@ -7,15 +7,15 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from rag.core.interfaces import VectorStore
-from rag.core.models import DocumentChunk, RetrievedChunk
+from rag.core.interfaces import IVectorStore
+from rag.core.schemas import DocumentChunk, RetrievedChunk
 from rag.db.models import DocumentChunkRow
 
 # Define whitelist for top-level schema columns to prevent attribute injection
 _ALLOWED_FILTER_COLS = frozenset({"document_id", "source_name", "chunk_index"})
 
 
-class PGVectorStore(VectorStore):
+class VectorStore(IVectorStore):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 

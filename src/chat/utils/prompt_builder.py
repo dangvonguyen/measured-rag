@@ -1,6 +1,6 @@
 from chat.core.interfaces import IPromptBuilder
 from chat.core.schemas import ChatMessage, Message
-from rag.core.models import RetrievedChunk
+from rag.core.schemas import RetrievedChunk
 
 DEFAULT_SYSTEM_PROMPT = (
     "You are a helpful assistant. Answer only from the provided context. "

@@ -8,7 +8,7 @@ import pytest
 from chat.core.schemas import ChatMessage, Message, RAGResponseLog
 from chat.pipeline.query import QueryPipeline
 from rag.core.config import RAGSettings
-from rag.core.models import RetrievedChunk
+from rag.core.schemas import RetrievedChunk
 
 
 def _msg(

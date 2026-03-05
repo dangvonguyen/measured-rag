@@ -6,15 +6,15 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from rag.db.models import DocumentChunkRow
-from rag.pipeline.ingestion import IngestionPipeline
-from rag.services.chunker import SentenceChunker
-from rag.services.loader import LlamaIndexDocumentLoader
-from rag.services.vector_store import PGVectorStore
+from rag.db.repositories.vector_store import VectorStore
+from rag.ingestion.chunker import SentenceChunker
+from rag.ingestion.loader import DocumentLoader
+from rag.ingestion.pipeline import IngestionPipeline
 
 
 @pytest.fixture
-def loader() -> LlamaIndexDocumentLoader:
-    return LlamaIndexDocumentLoader()
+def loader() -> DocumentLoader:
+    return DocumentLoader()
 
 
 @pytest.fixture
@@ -34,10 +34,10 @@ def mock_embedder() -> AsyncMock:
 
 @pytest.fixture
 def pipeline(
-    loader: LlamaIndexDocumentLoader,
+    loader: DocumentLoader,
     chunker: SentenceChunker,
     mock_embedder: AsyncMock,
-    vector_store: PGVectorStore,
+    vector_store: VectorStore,
 ) -> IngestionPipeline:
     return IngestionPipeline(
         loader=loader,
@@ -72,9 +72,9 @@ class TestIngestionWorkflows:
 
     async def test_partial_failure_rolls_back(
         self,
-        loader: LlamaIndexDocumentLoader,
+        loader: DocumentLoader,
         chunker: SentenceChunker,
-        vector_store: PGVectorStore,
+        vector_store: VectorStore,
         db_session: AsyncSession,
         documents_dir: Path,
     ) -> None:
@@ -113,10 +113,7 @@ class TestMetadataValidation:
     """IT-ING-04: Every chunk produced carries all required metadata fields."""
 
     async def test_chunk_metadata_completeness(
-        self,
-        loader: LlamaIndexDocumentLoader,
-        chunker: SentenceChunker,
-        documents_dir: Path,
+        self, loader: DocumentLoader, chunker: SentenceChunker, documents_dir: Path
     ) -> None:
         """Verify that chunker propagates all required metadata"""
         docs = loader.load(documents_dir / "terms_of_service.md")

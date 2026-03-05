@@ -4,11 +4,11 @@ from typing import Any
 import tiktoken
 from llama_index.core.node_parser import SentenceSplitter
 
-from rag.core.interfaces import DocumentChunker
-from rag.core.models import DocumentChunk
+from rag.core.interfaces import IDocumentChunker
+from rag.core.schemas import DocumentChunk
 
 
-class SentenceChunker(DocumentChunker):
+class SentenceChunker(IDocumentChunker):
     def __init__(
         self,
         tokenizer: tiktoken.Encoding | None = None,

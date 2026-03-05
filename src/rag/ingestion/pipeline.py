@@ -2,12 +2,12 @@ import logging
 from pathlib import Path
 
 from rag.core.interfaces import (
-    DocumentChunker,
-    DocumentLoader,
-    EmbeddingService,
-    VectorStore,
+    IDocumentChunker,
+    IDocumentLoader,
+    IEmbeddingService,
+    IVectorStore,
 )
-from rag.core.models import LoadedDocument
+from rag.core.schemas import LoadedDocument
 
 logger = logging.getLogger(__name__)
 
@@ -19,10 +19,10 @@ class IngestionPipeline:
 
     def __init__(
         self,
-        loader: DocumentLoader,
-        chunker: DocumentChunker,
-        embedder: EmbeddingService,
-        vector_store: VectorStore,
+        loader: IDocumentLoader,
+        chunker: IDocumentChunker,
+        embedder: IEmbeddingService,
+        vector_store: IVectorStore,
     ) -> None:
         self._loader = loader
         self._chunker = chunker

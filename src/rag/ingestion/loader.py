@@ -4,15 +4,15 @@ from pathlib import Path
 
 from llama_index.core import SimpleDirectoryReader
 
-from rag.core.interfaces import DocumentLoader
-from rag.core.models import LoadedDocument
+from rag.core.interfaces import IDocumentLoader
+from rag.core.schemas import LoadedDocument
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_SUPPORTED_EXTENSIONS = frozenset({".md", ".txt"})
 
 
-class LlamaIndexDocumentLoader(DocumentLoader):
+class DocumentLoader(IDocumentLoader):
     def __init__(self, supported_extensions: frozenset[str] | None = None) -> None:
         self._supported = (
             supported_extensions

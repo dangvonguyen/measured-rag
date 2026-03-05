@@ -3,14 +3,14 @@ from pathlib import Path
 
 import pytest
 
-from rag.core.models import LoadedDocument
-from rag.services.loader import DEFAULT_SUPPORTED_EXTENSIONS, LlamaIndexDocumentLoader
+from rag.core.schemas import LoadedDocument
+from rag.ingestion.loader import DEFAULT_SUPPORTED_EXTENSIONS, DocumentLoader
 
 
 def make_loader(
     supported_extensions: frozenset[str] | None = None,
-) -> LlamaIndexDocumentLoader:
-    return LlamaIndexDocumentLoader(supported_extensions=supported_extensions)
+) -> DocumentLoader:
+    return DocumentLoader(supported_extensions=supported_extensions)
 
 
 @pytest.mark.unit
@@ -210,7 +210,7 @@ class TestLoggingBehavior:
 
         loader = make_loader()
 
-        with caplog.at_level(logging.INFO, logger="rag.services.loader"):
+        with caplog.at_level(logging.INFO, logger="rag.ingestion.loader"):
             loader.load(test_file)
 
         info_records = [r for r in caplog.records if r.levelno == logging.INFO]

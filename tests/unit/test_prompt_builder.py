@@ -5,7 +5,7 @@ import pytest
 
 from chat.core.schemas import ChatMessage, Message
 from chat.utils.prompt_builder import StandardPromptBuilder
-from rag.core.models import RetrievedChunk
+from rag.core.schemas import RetrievedChunk
 
 
 @pytest.fixture
