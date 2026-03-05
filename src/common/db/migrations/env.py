@@ -16,7 +16,8 @@ from common.config import get_settings
 from common.db import base
 
 # Import all ORM models so Alembic can detect them
-from rag.db import models  # noqa
+from chat.db import models as chat_models  # isort: skip # noqa: F401
+from rag.db import models as rag_models  # isort: skip # noqa: F401
 
 # Alembic Config object
 config = context.config

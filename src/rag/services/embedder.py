@@ -5,12 +5,12 @@ from openai import AsyncOpenAI
 
 from common.config import get_settings
 from rag.core.config import EMBEDDING_DIMENSION, get_rag_settings
-from rag.core.interfaces import EmbeddingService
+from rag.core.interfaces import IEmbeddingService
 
 logger = logging.getLogger(__name__)
 
 
-class OpenAIEmbeddingService(EmbeddingService):
+class OpenAIEmbeddingService(IEmbeddingService):
     """OpenAI-backed embedding service."""
 
     def __init__(

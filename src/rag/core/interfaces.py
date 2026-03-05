@@ -1,32 +1,22 @@
 from abc import ABC, abstractmethod
-from collections.abc import AsyncIterator
 from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 from typing import Any
-from uuid import UUID
 
-from rag.core.models import (
-    ChatMessage,
-    Conversation,
-    DocumentChunk,
-    LoadedDocument,
-    Message,
-    RAGResponseLog,
-    RetrievedChunk,
-)
+from rag.core.schemas import DocumentChunk, LoadedDocument, RetrievedChunk
 
 
-class DocumentLoader(ABC):
+class IDocumentLoader(ABC):
     @abstractmethod
     def load(self, path: Path) -> list[LoadedDocument]: ...
 
 
-class DocumentChunker(ABC):
+class IDocumentChunker(ABC):
     @abstractmethod
     def chunk(self, text: str, metadata: dict[str, Any]) -> list[DocumentChunk]: ...
 
 
-class EmbeddingService(ABC):
+class IEmbeddingService(ABC):
     @abstractmethod
     async def embed_text(self, text: str) -> list[float]: ...
 
@@ -38,7 +28,7 @@ class EmbeddingService(ABC):
     def dimension(self) -> int: ...
 
 
-class VectorStore(ABC):
+class IVectorStore(ABC):
     @abstractmethod
     async def ingest(
         self,
@@ -67,7 +57,7 @@ class VectorStore(ABC):
         ...
 
 
-class RetrieverService(ABC):
+class IRetrieverService(ABC):
     @abstractmethod
     async def retrieve(
         self,
@@ -76,37 +66,3 @@ class RetrieverService(ABC):
         threshold: float,
         filters: dict[str, Any] | None = None,
     ) -> list[RetrievedChunk]: ...
-
-
-class PromptBuilder(ABC):
-    @abstractmethod
-    def build(
-        self,
-        history: list[Message],
-        chunks: list[RetrievedChunk],
-        query: str,
-    ) -> list[ChatMessage]: ...
-
-
-class LLMService(ABC):
-    @abstractmethod
-    def complete_stream(self, messages: list[ChatMessage]) -> AsyncIterator[str]: ...
-
-
-class ConversationRepository(ABC):
-    @abstractmethod
-    async def create(self, metadata: dict[str, Any]) -> Conversation: ...
-
-    @abstractmethod
-    async def get(self, conversation_id: UUID) -> Conversation | None: ...
-
-    @abstractmethod
-    async def get_history(self, conversation_id: UUID, limit: int) -> list[Message]: ...
-
-    @abstractmethod
-    async def add_message(
-        self, conversation_id: UUID, role: str, content: str
-    ) -> Message: ...
-
-    @abstractmethod
-    async def log_rag_response(self, message_id: UUID, log: RAGResponseLog) -> None: ...
