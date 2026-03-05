@@ -9,7 +9,7 @@ DEFAULT_SYSTEM_PROMPT = (
 )
 
 
-class StandardPromptBuilder(IPromptBuilder):
+class PromptBuilder(IPromptBuilder):
     def __init__(self, system_prompt: str | None = None) -> None:
         self._system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
 

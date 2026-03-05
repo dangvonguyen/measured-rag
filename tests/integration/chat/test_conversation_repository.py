@@ -7,12 +7,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from chat.core.schemas import Message, RAGResponseLog
 from chat.db.models import MessageRow
-from chat.db.repositories.conversation import PGConversationRepository
+from chat.db.repositories.conversation import ConversationRepository
 
 
 @pytest.fixture
-def repo(db_session: AsyncSession) -> PGConversationRepository:
-    return PGConversationRepository(db_session)
+def repo(db_session: AsyncSession) -> ConversationRepository:
+    return ConversationRepository(db_session)
 
 
 async def _stamp(session: AsyncSession, *messages: Message) -> None:
@@ -29,7 +29,7 @@ async def _stamp(session: AsyncSession, *messages: Message) -> None:
 
 @pytest.mark.integration
 class TestCreateAndGet:
-    async def test_create_and_get(self, repo: PGConversationRepository) -> None:
+    async def test_create_and_get(self, repo: ConversationRepository) -> None:
         created = await repo.create({"key": "value"})
         found = await repo.get(created.id)
 
@@ -37,14 +37,14 @@ class TestCreateAndGet:
         assert found.id == created.id
         assert found.metadata["key"] == "value"
 
-    async def test_get_missing_id(self, repo: PGConversationRepository) -> None:
+    async def test_get_missing_id(self, repo: ConversationRepository) -> None:
         result = await repo.get(uuid.uuid4())
         assert result is None
 
 
 @pytest.mark.integration
 class TestMessages:
-    async def test_add_message(self, repo: PGConversationRepository) -> None:
+    async def test_add_message(self, repo: ConversationRepository) -> None:
         conv = await repo.create({})
         msg = await repo.add_message(conv.id, "user", "Hello!")
 
@@ -54,7 +54,7 @@ class TestMessages:
         assert msg.conversation_id == conv.id
 
     async def test_get_history_ordering(
-        self, repo: PGConversationRepository, db_session: AsyncSession
+        self, repo: ConversationRepository, db_session: AsyncSession
     ) -> None:
         conv = await repo.create({})
         m1 = await repo.add_message(conv.id, "user", "first")
@@ -67,7 +67,7 @@ class TestMessages:
         assert [m.content for m in history] == ["first", "second", "third"]
 
     async def test_get_limited_history(
-        self, repo: PGConversationRepository, db_session: AsyncSession
+        self, repo: ConversationRepository, db_session: AsyncSession
     ) -> None:
         conv = await repo.create({})
         msgs = [await repo.add_message(conv.id, "user", f"msg{i}") for i in range(5)]
@@ -77,7 +77,7 @@ class TestMessages:
         assert len(history) == 2
         assert [m.content for m in history] == ["msg3", "msg4"]
 
-    async def test_get_empty_history(self, repo: PGConversationRepository) -> None:
+    async def test_get_empty_history(self, repo: ConversationRepository) -> None:
         conv = await repo.create({})
         history = await repo.get_history(conv.id, limit=10)
         assert history == []
@@ -86,7 +86,7 @@ class TestMessages:
 @pytest.mark.integration
 class TestRAGResponseLogging:
     async def test_log_rag_response_succeeds(
-        self, repo: PGConversationRepository
+        self, repo: ConversationRepository
     ) -> None:
         conv = await repo.create({})
         msg = await repo.add_message(conv.id, "assistant", "The answer is 42.")

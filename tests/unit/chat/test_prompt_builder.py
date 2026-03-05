@@ -4,13 +4,13 @@ from uuid import uuid4
 import pytest
 
 from chat.core.schemas import ChatMessage, Message
-from chat.utils.prompt_builder import StandardPromptBuilder
+from chat.utils.prompt_builder import PromptBuilder
 from rag.core.schemas import RetrievedChunk
 
 
 @pytest.fixture
-def builder() -> StandardPromptBuilder:
-    return StandardPromptBuilder()
+def builder() -> PromptBuilder:
+    return PromptBuilder()
 
 
 @pytest.fixture
@@ -62,32 +62,32 @@ def sample_history() -> list[Message]:
 @pytest.mark.unit
 class TestPromptBuilderStructure:
     def test_returns_chat_messages(
-        self, builder: StandardPromptBuilder, sample_chunks: list[RetrievedChunk]
+        self, builder: PromptBuilder, sample_chunks: list[RetrievedChunk]
     ) -> None:
         msgs = builder.build([], sample_chunks, "test")
         assert all(isinstance(m, ChatMessage) for m in msgs)
 
     def test_first_message_is_system(
-        self, builder: StandardPromptBuilder, sample_chunks: list[RetrievedChunk]
+        self, builder: PromptBuilder, sample_chunks: list[RetrievedChunk]
     ) -> None:
         msgs = builder.build([], sample_chunks, "test")
         assert msgs[0].role == "system"
 
     def test_last_message_is_user(
-        self, builder: StandardPromptBuilder, sample_chunks: list[RetrievedChunk]
+        self, builder: PromptBuilder, sample_chunks: list[RetrievedChunk]
     ) -> None:
         msgs = builder.build([], sample_chunks, "What color?")
         assert msgs[-1].role == "user"
 
     def test_user_message_contains_query(
-        self, builder: StandardPromptBuilder, sample_chunks: list[RetrievedChunk]
+        self, builder: PromptBuilder, sample_chunks: list[RetrievedChunk]
     ) -> None:
         query = "What color is a banana?"
         msgs = builder.build([], sample_chunks, query)
         assert query in msgs[-1].content
 
     def test_context_contains_chunk_texts(
-        self, builder: StandardPromptBuilder, sample_chunks: list[RetrievedChunk]
+        self, builder: PromptBuilder, sample_chunks: list[RetrievedChunk]
     ) -> None:
         msgs = builder.build([], sample_chunks, "test")
         user_content = msgs[-1].content
@@ -95,7 +95,7 @@ class TestPromptBuilderStructure:
         assert "Bananas are yellow." in user_content
 
     def test_context_uses_numbered_citations(
-        self, builder: StandardPromptBuilder, sample_chunks: list[RetrievedChunk]
+        self, builder: PromptBuilder, sample_chunks: list[RetrievedChunk]
     ) -> None:
         msgs = builder.build([], sample_chunks, "test")
         user_content = msgs[-1].content
@@ -103,13 +103,13 @@ class TestPromptBuilderStructure:
         assert "[2]" in user_content
 
     def test_no_history_returns_two_messages(
-        self, builder: StandardPromptBuilder, sample_chunks: list[RetrievedChunk]
+        self, builder: PromptBuilder, sample_chunks: list[RetrievedChunk]
     ) -> None:
         msgs = builder.build([], sample_chunks, "test")
         assert len(msgs) == 2  # system + user
 
     def test_empty_chunks_builds_prompt_without_context(
-        self, builder: StandardPromptBuilder
+        self, builder: PromptBuilder
     ) -> None:
         msgs = builder.build([], [], "What is 2+2?")
         assert len(msgs) == 2
@@ -120,7 +120,7 @@ class TestPromptBuilderStructure:
 class TestPromptBuilderHistory:
     def test_history_appended_between_system_and_user(
         self,
-        builder: StandardPromptBuilder,
+        builder: PromptBuilder,
         sample_chunks: list[RetrievedChunk],
         sample_history: list[Message],
     ) -> None:
@@ -130,7 +130,7 @@ class TestPromptBuilderHistory:
 
     def test_history_content_preserved(
         self,
-        builder: StandardPromptBuilder,
+        builder: PromptBuilder,
         sample_chunks: list[RetrievedChunk],
         sample_history: list[Message],
     ) -> None:
@@ -140,6 +140,6 @@ class TestPromptBuilderHistory:
 
     def test_custom_system_prompt(self, sample_chunks: list[RetrievedChunk]) -> None:
         custom = "Custom system instructions."
-        builder = StandardPromptBuilder(system_prompt=custom)
+        builder = PromptBuilder(system_prompt=custom)
         msgs = builder.build([], sample_chunks, "test")
         assert msgs[0].content == custom

@@ -13,7 +13,7 @@ from common.config import get_settings
 logger = logging.getLogger(__name__)
 
 
-class OpenAILLMService(ILLMService):
+class LLMService(ILLMService):
     def __init__(
         self,
         model: str | None = None,

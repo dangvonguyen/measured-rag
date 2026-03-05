@@ -9,7 +9,7 @@ from chat.core.schemas import Conversation, Message, RAGResponseLog
 from chat.db.models import ConversationRow, MessageRole, MessageRow, RAGResponseRow
 
 
-class PGConversationRepository(IConversationRepository):
+class ConversationRepository(IConversationRepository):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 

@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from chat.core.schemas import ChatMessage
-from chat.services.llm import OpenAILLMService
+from chat.services.llm import LLMService
 
 
 def _make_chunk(content: str | None) -> MagicMock:
@@ -27,8 +27,8 @@ def mock_client() -> AsyncMock:
 
 
 @pytest.fixture
-def llm(mock_client: AsyncMock) -> OpenAILLMService:
-    return OpenAILLMService(client=mock_client, model="gpt-4o-mini")
+def llm(mock_client: AsyncMock) -> LLMService:
+    return LLMService(client=mock_client, model="gpt-4o-mini")
 
 
 @pytest.fixture
@@ -43,7 +43,7 @@ def messages() -> list[ChatMessage]:
 @pytest.mark.asyncio
 class TestLLMServiceStream:
     async def test_yields_text_tokens(
-        self, llm: OpenAILLMService, messages: list[ChatMessage], mock_client: AsyncMock
+        self, llm: LLMService, messages: list[ChatMessage], mock_client: AsyncMock
     ) -> None:
         tokens = ["Hello", ", ", "world", "!"]
         mock_client.chat.completions.create.return_value = _mock_stream([*tokens, None])
@@ -56,7 +56,7 @@ class TestLLMServiceStream:
         mock_client.chat.completions.create.assert_called_once()
 
     async def test_skips_none_delta(
-        self, llm: OpenAILLMService, messages: list[ChatMessage], mock_client: AsyncMock
+        self, llm: LLMService, messages: list[ChatMessage], mock_client: AsyncMock
     ) -> None:
         # Stream containing None and empty strings
         tokens = ["Hello", None, "", " world"]
@@ -70,7 +70,7 @@ class TestLLMServiceStream:
         assert result == ["Hello", " world"]
 
     async def test_passes_correct_params_to_api(
-        self, llm: OpenAILLMService, messages: list[ChatMessage], mock_client: AsyncMock
+        self, llm: LLMService, messages: list[ChatMessage], mock_client: AsyncMock
     ) -> None:
         mock_client.chat.completions.create.return_value = _mock_stream(["ok"])
 
@@ -90,7 +90,7 @@ class TestLLMServiceStream:
         ]
 
     async def test_handles_api_error(
-        self, llm: OpenAILLMService, messages: list[ChatMessage], mock_client: AsyncMock
+        self, llm: LLMService, messages: list[ChatMessage], mock_client: AsyncMock
     ) -> None:
         """
         Ensure the service raises and logs on API failure.
