@@ -61,7 +61,7 @@ class IRetrieverService(ABC):
     @abstractmethod
     async def retrieve(
         self,
-        query_vector: list[float],
+        query: str,
         top_k: int,
         threshold: float,
         filters: dict[str, Any] | None = None,

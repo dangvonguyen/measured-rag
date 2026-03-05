@@ -58,13 +58,6 @@ def settings() -> RAGSettings:
 
 
 @pytest.fixture
-def embedder() -> AsyncMock:
-    mock = AsyncMock()
-    mock.embed_text.return_value = [0.1] * 5
-    return mock
-
-
-@pytest.fixture
 def retriever() -> AsyncMock:
     mock = AsyncMock()
     mock.retrieve.return_value = [_chunk()]
@@ -101,7 +94,6 @@ def conv_repo() -> AsyncMock:
 
 @pytest.fixture
 def pipeline(
-    embedder: AsyncMock,
     retriever: AsyncMock,
     prompt_builder: MagicMock,
     llm: MagicMock,
@@ -109,7 +101,6 @@ def pipeline(
     settings: RAGSettings,
 ) -> QueryPipeline:
     return QueryPipeline(
-        embedder=embedder,
         retriever=retriever,
         prompt_builder=prompt_builder,
         llm=llm,
@@ -123,10 +114,8 @@ class TestQueryPipelineStream:
     async def test_run_stream_success(
         self,
         pipeline: QueryPipeline,
-        embedder: AsyncMock,
         retriever: AsyncMock,
         prompt_builder: MagicMock,
-        llm: MagicMock,
         conv_repo: AsyncMock,
         settings: RAGSettings,
     ) -> None:
@@ -154,12 +143,9 @@ class TestQueryPipelineStream:
         assert token_seen == ["Hello", " world"]
         assert user_msg_saved_before_stream
 
-        # Verify query embedding
-        embedder.embed_text.assert_called_once_with(query)
-
-        # Verify retrieval with the correct settings
+        # Verify retrieval with raw query text and correct settings
         retriever.retrieve.assert_called_once_with(
-            embedder.embed_text.return_value,
+            query,
             top_k=settings.RETRIEVAL_TOP_K,
             threshold=settings.RETRIEVAL_THRESHOLD,
         )
