@@ -7,8 +7,9 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from common.schemas import RetrievedChunk
 from rag.core.interfaces import IVectorStore
-from rag.core.schemas import DocumentChunk, RetrievedChunk
+from rag.core.schemas import DocumentChunk
 from rag.db.models import DocumentChunkRow
 
 # Define whitelist for top-level schema columns to prevent attribute injection

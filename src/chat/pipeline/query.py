@@ -4,10 +4,10 @@ from uuid import UUID
 
 import tiktoken
 
+from chat.core.config import ChatSettings
 from chat.core.interfaces import IConversationRepository, ILLMService, IPromptBuilder
 from chat.core.schemas import RAGResponseLog
-from rag.core.config import RAGSettings
-from rag.core.interfaces import IEmbeddingService, IRetrieverService
+from common.interfaces import IRetrieverService
 
 
 class QueryPipeline:
@@ -15,14 +15,12 @@ class QueryPipeline:
 
     def __init__(
         self,
-        embedder: IEmbeddingService,
         retriever: IRetrieverService,
         prompt_builder: IPromptBuilder,
         llm: ILLMService,
         conversation_repo: IConversationRepository,
-        settings: RAGSettings,
+        settings: ChatSettings,
     ) -> None:
-        self._embedder = embedder
         self._retriever = retriever
         self._prompt_builder = prompt_builder
         self._llm = llm
@@ -37,20 +35,18 @@ class QueryPipeline:
 
         Orchestration order:
         1. Load conversation history
-        2. Embed query
-        3. Retrieve chunks
-        4. Build prompt
-        5. Persist user message
-        6. Stream LLM
-        7. Persist assistant message + log RAGResponse
+        2. Retrieve chunks
+        3. Build prompt
+        4. Persist user message
+        5. Stream LLM
+        6. Persist assistant message + log RAGResponse
         """
         history = await self._conv_repo.get_history(
             conversation_id, limit=self._settings.HISTORY_MAX_TURNS * 2
         )
 
-        query_vector = await self._embedder.embed_text(query)
         chunks = await self._retriever.retrieve(
-            query_vector,
+            query,
             top_k=self._settings.RETRIEVAL_TOP_K,
             threshold=self._settings.RETRIEVAL_THRESHOLD,
         )

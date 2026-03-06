@@ -5,10 +5,10 @@ from unittest.mock import AsyncMock, MagicMock, call
 
 import pytest
 
+from chat.core.config import ChatSettings
 from chat.core.schemas import ChatMessage, Message, RAGResponseLog
 from chat.pipeline.query import QueryPipeline
-from rag.core.config import RAGSettings
-from rag.core.schemas import RetrievedChunk
+from common.schemas import RetrievedChunk
 
 
 def _msg(
@@ -46,8 +46,8 @@ async def _error_stream() -> AsyncIterator[str]:
 
 
 @pytest.fixture
-def settings() -> RAGSettings:
-    return RAGSettings(
+def settings() -> ChatSettings:
+    return ChatSettings(
         LLM_MODEL="gpt-4o-mini",
         LLM_TEMPERATURE=0.1,
         LLM_MAX_TOKENS=2048,
@@ -55,13 +55,6 @@ def settings() -> RAGSettings:
         RETRIEVAL_THRESHOLD=0.5,
         HISTORY_MAX_TURNS=10,
     )
-
-
-@pytest.fixture
-def embedder() -> AsyncMock:
-    mock = AsyncMock()
-    mock.embed_text.return_value = [0.1] * 5
-    return mock
 
 
 @pytest.fixture
@@ -101,15 +94,13 @@ def conv_repo() -> AsyncMock:
 
 @pytest.fixture
 def pipeline(
-    embedder: AsyncMock,
     retriever: AsyncMock,
     prompt_builder: MagicMock,
     llm: MagicMock,
     conv_repo: AsyncMock,
-    settings: RAGSettings,
+    settings: ChatSettings,
 ) -> QueryPipeline:
     return QueryPipeline(
-        embedder=embedder,
         retriever=retriever,
         prompt_builder=prompt_builder,
         llm=llm,
@@ -123,12 +114,10 @@ class TestQueryPipelineStream:
     async def test_run_stream_success(
         self,
         pipeline: QueryPipeline,
-        embedder: AsyncMock,
         retriever: AsyncMock,
         prompt_builder: MagicMock,
-        llm: MagicMock,
         conv_repo: AsyncMock,
-        settings: RAGSettings,
+        settings: ChatSettings,
     ) -> None:
         """
         Tests the complete happy-path execution of the query pipeline stream.
@@ -154,12 +143,9 @@ class TestQueryPipelineStream:
         assert token_seen == ["Hello", " world"]
         assert user_msg_saved_before_stream
 
-        # Verify query embedding
-        embedder.embed_text.assert_called_once_with(query)
-
-        # Verify retrieval with the correct settings
+        # Verify retrieval with raw query text and correct settings
         retriever.retrieve.assert_called_once_with(
-            embedder.embed_text.return_value,
+            query,
             top_k=settings.RETRIEVAL_TOP_K,
             threshold=settings.RETRIEVAL_THRESHOLD,
         )

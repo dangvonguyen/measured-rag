@@ -20,13 +20,3 @@ class DocumentChunk(BaseModel):
     text: str = Field(min_length=1)
     token_count: int = Field(gt=0)
     metadata: dict[str, Any] = Field(default_factory=dict)
-
-
-class RetrievedChunk(BaseModel):
-    chunk_id: str
-    document_id: str
-    source_name: str
-    chunk_index: int
-    text: str
-    score: float
-    metadata: dict[str, Any]

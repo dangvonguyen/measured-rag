@@ -2,7 +2,8 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from rag.core.schemas import DocumentChunk, RetrievedChunk
+from common.schemas import RetrievedChunk
+from rag.core.schemas import DocumentChunk
 from rag.db.models import DocumentChunkRow
 from rag.db.repositories.vector_store import VectorStore
 

@@ -3,7 +3,8 @@ from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 from typing import Any
 
-from rag.core.schemas import DocumentChunk, LoadedDocument, RetrievedChunk
+from common.schemas import RetrievedChunk
+from rag.core.schemas import DocumentChunk, LoadedDocument
 
 
 class IDocumentLoader(ABC):
@@ -55,14 +56,3 @@ class IVectorStore(ABC):
         Commits on success; rolls back to it on exception.
         """
         ...
-
-
-class IRetrieverService(ABC):
-    @abstractmethod
-    async def retrieve(
-        self,
-        query_vector: list[float],
-        top_k: int,
-        threshold: float,
-        filters: dict[str, Any] | None = None,
-    ) -> list[RetrievedChunk]: ...

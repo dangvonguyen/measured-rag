@@ -3,7 +3,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from rag.core.schemas import DocumentChunk, RetrievedChunk
+from common.schemas import RetrievedChunk
+from rag.core.schemas import DocumentChunk
 from rag.db.repositories.vector_store import VectorStore
 
 

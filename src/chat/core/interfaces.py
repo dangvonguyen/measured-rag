@@ -4,7 +4,7 @@ from typing import Any
 from uuid import UUID
 
 from chat.core.schemas import ChatMessage, Conversation, Message, RAGResponseLog
-from rag.core.schemas import RetrievedChunk
+from common.schemas import RetrievedChunk
 
 
 class ILLMService(ABC):
