@@ -4,10 +4,10 @@ from uuid import UUID
 
 import tiktoken
 
+from chat.core.config import ChatSettings
 from chat.core.interfaces import IConversationRepository, ILLMService, IPromptBuilder
 from chat.core.schemas import RAGResponseLog
-from rag.core.config import RAGSettings
-from rag.core.interfaces import IRetrieverService
+from common.interfaces import IRetrieverService
 
 
 class QueryPipeline:
@@ -19,7 +19,7 @@ class QueryPipeline:
         prompt_builder: IPromptBuilder,
         llm: ILLMService,
         conversation_repo: IConversationRepository,
-        settings: RAGSettings,
+        settings: ChatSettings,
     ) -> None:
         self._retriever = retriever
         self._prompt_builder = prompt_builder

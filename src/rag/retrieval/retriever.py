@@ -2,8 +2,9 @@ import logging
 import time
 from typing import Any
 
-from rag.core.interfaces import IEmbeddingService, IRetrieverService, IVectorStore
-from rag.core.schemas import RetrievedChunk
+from common.interfaces import IRetrieverService
+from common.schemas import RetrievedChunk
+from rag.core.interfaces import IEmbeddingService, IVectorStore
 
 logger = logging.getLogger(__name__)
 

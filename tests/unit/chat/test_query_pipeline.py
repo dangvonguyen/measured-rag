@@ -5,10 +5,10 @@ from unittest.mock import AsyncMock, MagicMock, call
 
 import pytest
 
+from chat.core.config import ChatSettings
 from chat.core.schemas import ChatMessage, Message, RAGResponseLog
 from chat.pipeline.query import QueryPipeline
-from rag.core.config import RAGSettings
-from rag.core.schemas import RetrievedChunk
+from common.schemas import RetrievedChunk
 
 
 def _msg(
@@ -46,8 +46,8 @@ async def _error_stream() -> AsyncIterator[str]:
 
 
 @pytest.fixture
-def settings() -> RAGSettings:
-    return RAGSettings(
+def settings() -> ChatSettings:
+    return ChatSettings(
         LLM_MODEL="gpt-4o-mini",
         LLM_TEMPERATURE=0.1,
         LLM_MAX_TOKENS=2048,
@@ -98,7 +98,7 @@ def pipeline(
     prompt_builder: MagicMock,
     llm: MagicMock,
     conv_repo: AsyncMock,
-    settings: RAGSettings,
+    settings: ChatSettings,
 ) -> QueryPipeline:
     return QueryPipeline(
         retriever=retriever,
@@ -117,7 +117,7 @@ class TestQueryPipelineStream:
         retriever: AsyncMock,
         prompt_builder: MagicMock,
         conv_repo: AsyncMock,
-        settings: RAGSettings,
+        settings: ChatSettings,
     ) -> None:
         """
         Tests the complete happy-path execution of the query pipeline stream.

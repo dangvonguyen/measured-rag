@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from rag.core.schemas import RetrievedChunk
+from common.schemas import RetrievedChunk
 from rag.retrieval.retriever import RetrieverService
 
 
